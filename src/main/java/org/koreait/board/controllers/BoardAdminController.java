@@ -27,6 +27,8 @@ public class BoardAdminController {
     @PostMapping("/config")
     public JSONData save(@Valid @RequestBody RequestConfig form, Errors errors) {
 
+        configValidator.validate(form, errors);
+
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
