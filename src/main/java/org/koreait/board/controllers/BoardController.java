@@ -1,12 +1,20 @@
 package org.koreait.board.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koreait.global.exceptions.BadRequestException;
+import org.koreait.global.libs.Utils;
 import org.koreait.global.rests.JSONData;
+import org.springframework.util.StringUtils;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 public class BoardController {
+
+    private final Utils utils;
+
     /**
      * 게시판 설정 한개 조회
      *
@@ -25,7 +33,14 @@ public class BoardController {
      * @return
      */
     @PostMapping("/save")
-    public JSONData save() {
+    public JSONData save(@Valid @RequestBody RequestBoard form, Errors errors) {
+        String mode = form.getMode();
+        mode = StringUtils.hasText(mode) ? mode : "write";
+        commonProcess(form.getBid(), mode); // 공통 처리
+        if (errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
+
 
         return null;
     }
@@ -65,5 +80,26 @@ public class BoardController {
     public JSONData delete(@PathVariable("seq") Long seq) {
 
         return null;
+    }
+
+
+    /**
+     * 게시글 번호로 공통 처리
+     *
+     * @param seq
+     * @param mode
+     */
+    private void commonProcess(Long seq, String mode) {
+
+    }
+
+    /**
+     * 게시판 아이디로 공통 처리
+     *
+     * @param bid
+     * @param mode
+     */
+    private void commonProcess(String bid, String mode) {
+
     }
 }
