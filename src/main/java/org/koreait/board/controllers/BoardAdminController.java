@@ -2,6 +2,7 @@ package org.koreait.board.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koreait.board.validators.BoardConfigValidator;
 import org.koreait.global.exceptions.BadRequestException;
 import org.koreait.global.libs.Utils;
 import org.koreait.global.rests.JSONData;
@@ -16,7 +17,7 @@ import java.util.List;
 public class BoardAdminController {
 
     private final Utils utils;
-
+    private final BoardConfigValidator configValidator;
 
     /**
      * 게시판 설정 등록, 수정 처리
