@@ -5,6 +5,7 @@ import org.koreait.board.controllers.RequestBoard;
 import org.koreait.global.validators.PasswordValidator;
 import org.koreait.member.MemberUtil;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
@@ -17,6 +18,7 @@ import org.springframework.validation.Validator;
 public class BoardValidator implements Validator, PasswordValidator {
 
     private final MemberUtil memberUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -45,5 +47,28 @@ public class BoardValidator implements Validator, PasswordValidator {
         if (mode != null && mode.equals("edit") && (seq == null || seq < 1L)) {
             errors.rejectValue("seq", "NotNull");
         }
+    }
+
+    /**
+     * 비회원 비밀번호 체크
+     *
+     * @param password
+     * @param seq
+     */
+    public boolean checkGuestPassword(String password, Long seq) {
+        if (seq == null) return false;
+
+
+
+        return false;
+    }
+
+    /**
+     * 게시글 삭제 가능 여부 체크
+     *  - 댓글이 존재하면 삭제 불가
+     * @param seq
+     */
+    public void checkDelete(Long seq) {
+
     }
 }
