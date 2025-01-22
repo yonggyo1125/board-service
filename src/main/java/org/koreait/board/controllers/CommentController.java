@@ -1,7 +1,11 @@
 package org.koreait.board.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koreait.global.exceptions.BadRequestException;
+import org.koreait.global.libs.Utils;
 import org.koreait.global.rests.JSONData;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -9,13 +13,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/comment")
 public class CommentController {
 
+    private final Utils utils;
+
     /**
      * 댓글 작성, 수정
      *
      * @return
      */
     @PostMapping("/save")
-    public JSONData save() {
+    public JSONData save(@RequestBody @Valid RequestComment form, Errors errors) {
+
+        if (errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
 
         return null;
     }
