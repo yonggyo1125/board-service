@@ -1,7 +1,11 @@
 package org.koreait.board.controllers;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koreait.global.exceptions.BadRequestException;
+import org.koreait.global.libs.Utils;
 import org.koreait.global.rests.JSONData;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,13 +15,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BoardAdminController {
 
+    private final Utils utils;
+
+
     /**
      * 게시판 설정 등록, 수정 처리
      *
      * @return
      */
     @PostMapping("/config")
-    public JSONData save() {
+    public JSONData save(@Valid @RequestBody RequestConfig form, Errors errors) {
+
+        if (errors.hasErrors()) {
+            throw new BadRequestException(utils.getErrorMessages(errors));
+        }
 
         return null;
     }
