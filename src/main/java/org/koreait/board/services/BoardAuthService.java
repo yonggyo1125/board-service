@@ -9,13 +9,13 @@ import org.koreait.board.exceptions.BoardNotFoundException;
 import org.koreait.board.exceptions.GuestPasswordCheckException;
 import org.koreait.board.services.comment.CommentInfoService;
 import org.koreait.board.services.configs.BoardConfigInfoService;
-import org.koreait.global.exceptions.scripts.AlertBackException;
+import org.koreait.global.exceptions.BadRequestException;
+import org.koreait.global.exceptions.UnAuthorizedException;
 import org.koreait.global.libs.Utils;
-import org.koreait.member.constants.Authority;
-import org.koreait.member.entities.Member;
-import org.koreait.member.libs.MemberUtil;
+import org.koreait.member.Member;
+import org.koreait.member.MemberUtil;
+import org.koreait.member.contants.Authority;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -42,7 +42,7 @@ public class BoardAuthService {
     public void check(String mode, String bid, Long seq) {
         System.out.printf("mode=%s, bid=%s, seq=%d%n", mode, bid, seq);
         if (!StringUtils.hasText(mode) || !StringUtils.hasText(bid) || (List.of("edit", "delete", "comment").contains(mode) && (seq == null || seq < 1L ))) {
-            throw new AlertBackException(utils.getMessage("BadRequest"), HttpStatus.BAD_REQUEST);
+            throw new BadRequestException();
         }
 
         if (memberUtil.isAdmin()) { // 관리자는 모두 허용
@@ -84,9 +84,9 @@ public class BoardAuthService {
              * 2. 비회원 게시글인 경우 / 비회원 비밀번호 확인이 완료된 경우 삭제 가능
              */
             BoardData item = infoService.get(seq);
-            Member poster = item.getMember();
+            String createdBy = item.getCreatedBy();
 
-            if (poster == null) { // 비회원 게시글
+            if (createdBy == null) { // 비회원 게시글
                 /**
                  * 비회원 게시글이 인증된 경우 - 세션 키 - "board_게시글번호"가 존재
                  * 인증이 되지 않은 경우 GuestPasswordCheckException을 발생 시킨다 -> 비번 확인 절차
@@ -96,17 +96,17 @@ public class BoardAuthService {
                     throw new GuestPasswordCheckException();
                 }
 
-            } else if (!memberUtil.isLogin() || !poster.getEmail().equals(member.getEmail())) { // 회원 게시글  - 직접 작성한 회원만 수정 가능 통제 - 미로그인 상태 또는 로그인 상태이지만 작성자의 이메일과 일치하지 않는 경우
+            } else if (!memberUtil.isLogin() || !createdBy.equals(member.getEmail())) { // 회원 게시글  - 직접 작성한 회원만 수정 가능 통제 - 미로그인 상태 또는 로그인 상태이지만 작성자의 이메일과 일치하지 않는 경우
                 isVerified = false;
             }
         } else if (mode.equals("comment")) { // 댓글 수정 삭제
-            Member commenter = comment.getMember();
+            String commenter = comment.getCreatedBy();
             if (commenter == null) { // 비회원으로 작성한 댓글
                 if (session.getAttribute("comment_" + seq) == null) { // 댓글 비회원 인증 X
                     session.setAttribute("cSeq", seq);
                     throw new GuestPasswordCheckException();
                 }
-            } else if (!memberUtil.isLogin() || !commenter.getEmail().equals(member.getEmail())) { // 회원이 작성한 댓글
+            } else if (!memberUtil.isLogin() || !commenter.equals(member.getEmail())) { // 회원이 작성한 댓글
                 isVerified = false;
             }
         }
@@ -116,7 +116,7 @@ public class BoardAuthService {
         }
 
         if (!isVerified) {
-            throw new AlertBackException(utils.getMessage("UnAuthorized"), HttpStatus.UNAUTHORIZED);
+            throw new UnAuthorizedException();
         }
     }
 
