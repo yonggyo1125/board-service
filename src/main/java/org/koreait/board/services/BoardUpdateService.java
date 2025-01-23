@@ -11,12 +11,15 @@ import org.koreait.board.services.configs.BoardConfigInfoService;
 import org.koreait.global.libs.Utils;
 import org.koreait.member.MemberUtil;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.Objects;
 
 @Lazy
@@ -78,7 +81,9 @@ public class BoardUpdateService {
         boardDataRepository.saveAndFlush(data);
 
         /* 게시글 파일 첨부 작업 완료 처리 S */
-
+        String apiUrl = utils.serviceUrl("file-service", "/done/" + data.getGid());
+        HttpEntity<Void> request = new HttpEntity<>(utils.getRequestHeader());
+        restTemplate.exchange(URI.create(apiUrl), HttpMethod.GET, request, Void.class);
         /* 게시글 파일 첨부 작업 완료 처리 E */
 
         // 비회원 게시글 인증 정보 삭제

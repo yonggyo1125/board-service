@@ -2,6 +2,12 @@ package org.koreait.board.validators;
 
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.controllers.RequestBoard;
+import org.koreait.board.entities.BoardData;
+import org.koreait.board.entities.QCommentData;
+import org.koreait.board.repositories.BoardDataRepository;
+import org.koreait.board.repositories.CommentDataRepository;
+import org.koreait.global.exceptions.BadRequestException;
+import org.koreait.global.libs.Utils;
 import org.koreait.global.validators.PasswordValidator;
 import org.koreait.member.MemberUtil;
 import org.springframework.context.annotation.Lazy;
@@ -19,6 +25,9 @@ public class BoardValidator implements Validator, PasswordValidator {
 
     private final MemberUtil memberUtil;
     private final PasswordEncoder passwordEncoder;
+    private final BoardDataRepository boardDataRepository;
+    private final CommentDataRepository commentDataRepository;
+    private final Utils utils;
 
     @Override
     public boolean supports(Class<?> clazz) {
@@ -58,7 +67,11 @@ public class BoardValidator implements Validator, PasswordValidator {
     public boolean checkGuestPassword(String password, Long seq) {
         if (seq == null) return false;
 
+        BoardData item = boardDataRepository.findById(seq).orElse(null);
 
+        if (item != null && StringUtils.hasText(item.getGuestPw())) {
+            return passwordEncoder.matches(password, item.getGuestPw());
+        }
 
         return false;
     }
@@ -69,6 +82,10 @@ public class BoardValidator implements Validator, PasswordValidator {
      * @param seq
      */
     public void checkDelete(Long seq) {
+        QCommentData commentData = QCommentData.commentData;
 
+        if (commentDataRepository.count(commentData.data.seq.eq(seq)) > 0L) {
+            throw new BadRequestException(utils.getMessage("Exist.comment"));
+        }
     }
 }

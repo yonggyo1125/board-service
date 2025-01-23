@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.koreait.global.entities.CodeValue;
 import org.koreait.global.repositories.CodeValueRepository;
+import org.koreait.member.MemberUtil;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.MessageSource;
@@ -28,6 +29,7 @@ public class Utils {
     private final MessageSource messageSource;
     private final DiscoveryClient discoveryClient;
     private final CodeValueRepository codeValueRepository;
+    private final MemberUtil memberUtil;
 
     /**
      * 메서지 코드로 조회된 문구
@@ -212,4 +214,17 @@ public class Utils {
 
         return headers;
     }
+
+    // 회원, 비회원 구분 해시
+    public int getMemberHash() {
+        // 회원 - 회원번호, 비회원 - IP + User-Agent
+        if (memberUtil.isLogin()) return Objects.hash(memberUtil.getMember().getSeq());
+        else { // 비회원
+            String ip = request.getRemoteAddr();
+            String ua = request.getHeader("User-Agent");
+
+            return Objects.hash(ip, ua);
+        }
+    }
+
 }
