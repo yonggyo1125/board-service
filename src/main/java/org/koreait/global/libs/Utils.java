@@ -1,5 +1,6 @@
 package org.koreait.global.libs;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.koreait.global.entities.CodeValue;
@@ -162,6 +163,17 @@ public class Utils {
     }
 
     public String getUserHash() {
-        return getValue("" + Objects.hash("userHash"));
+        String userKey = "" + Objects.hash("userHash");
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(userKey)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        return "";
     }
 }

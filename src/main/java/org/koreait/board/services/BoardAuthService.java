@@ -1,6 +1,5 @@
 package org.koreait.board.services;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.entities.Board;
 import org.koreait.board.entities.BoardData;
@@ -30,8 +29,6 @@ public class BoardAuthService {
     private final BoardInfoService infoService;
     private final CommentInfoService commentInfoService;
     private final MemberUtil memberUtil;
-    private final HttpSession session;
-
     /**
      * 게시판 권한 체크
      *
@@ -91,8 +88,8 @@ public class BoardAuthService {
                  * 비회원 게시글이 인증된 경우 - 세션 키 - "board_게시글번호"가 존재
                  * 인증이 되지 않은 경우 GuestPasswordCheckException을 발생 시킨다 -> 비번 확인 절차
                  */
-                if (session.getAttribute("board_" + seq) == null) {
-                    session.setAttribute("seq", seq);
+                if (utils.getValue(utils.getUserHash() + "_board_" + seq) == null) {
+                    utils.saveValue(utils.getUserHash() + "_seq", seq);
                     throw new GuestPasswordCheckException();
                 }
 
@@ -102,8 +99,8 @@ public class BoardAuthService {
         } else if (mode.equals("comment")) { // 댓글 수정 삭제
             String commenter = comment.getCreatedBy();
             if (commenter == null) { // 비회원으로 작성한 댓글
-                if (session.getAttribute("comment_" + seq) == null) { // 댓글 비회원 인증 X
-                    session.setAttribute("cSeq", seq);
+                if (utils.getValue(utils.getUserHash() + "_comment_" + seq) == null) { // 댓글 비회원 인증 X
+                    utils.saveValue(utils.getUserHash() + "_cSeq", seq);
                     throw new GuestPasswordCheckException();
                 }
             } else if (!memberUtil.isLogin() || !commenter.equals(member.getEmail())) { // 회원이 작성한 댓글
