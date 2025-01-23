@@ -14,13 +14,11 @@ import org.koreait.board.entities.QBoardData;
 import org.koreait.board.exceptions.BoardDataNotFoundException;
 import org.koreait.board.repositories.BoardDataRepository;
 import org.koreait.board.services.configs.BoardConfigInfoService;
-import org.koreait.file.entities.FileInfo;
-import org.koreait.file.services.FileInfoService;
 import org.koreait.global.libs.Utils;
 import org.koreait.global.paging.ListData;
 import org.koreait.global.paging.Pagination;
-import org.koreait.member.entities.Member;
-import org.koreait.member.libs.MemberUtil;
+import org.koreait.member.Member;
+import org.koreait.member.MemberUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -35,7 +33,6 @@ public class BoardInfoService {
 
     private final BoardConfigInfoService configInfoService;
     private final BoardDataRepository boardDataRepository;
-    private final FileInfoService fileInfoService;
     private final JPAQueryFactory queryFactory;
     private final HttpServletRequest request;
     private final MemberUtil memberUtil;
@@ -125,8 +122,8 @@ public class BoardInfoService {
 
             StringExpression subject = boardData.subject;
             StringExpression content = boardData.content;
-            StringExpression poster = boardData.poster.concat(boardData.member.name)
-                    .concat(boardData.member.email);
+            StringExpression poster = boardData.poster.concat(boardData.createdBy);
+
 
             StringExpression condition = null;
             if (sopt.equals("SUBJECT")) { // 제목 검색
@@ -147,15 +144,13 @@ public class BoardInfoService {
         // 회원 이메일
         List<String> emails = search.getEmail();
         if (emails != null && !emails.isEmpty()) {
-            andBuilder.and(boardData.member.email.in(emails));
+            andBuilder.and(boardData.createdBy.in(emails));
         }
 
         /* 검색 처리 E */
 
         JPAQuery<BoardData> query = queryFactory.selectFrom(boardData)
                 .leftJoin(boardData.board)
-                .fetchJoin()
-                .leftJoin(boardData.member)
                 .fetchJoin()
                 .where(andBuilder)
                 .offset(offset)
@@ -254,18 +249,6 @@ public class BoardInfoService {
      * @param item
      */
     private void addInfo(BoardData item, boolean isView) {
-        // 게시판 파일 정보 S
-        String gid = item.getGid();
-        List<FileInfo> editorImages = fileInfoService.getList(gid, "editor");
-        item.setEditorImages(editorImages);
-        item.setAttachFiles(fileInfoService.getList(gid, "attach"));
-
-        if (editorImages != null && !editorImages.isEmpty()) {
-            FileInfo selectedImage = editorImages.stream().filter(FileInfo::isSelected).findFirst().orElseGet(() -> editorImages.get(0));
-            item.setSelectedImage(selectedImage);
-        }
-
-        // 게시판 파일 정보 E
 
         // 이전, 다음 게시글
         if (isView) { // 보기 페이지 데이터를 조회하는 경우만 이전, 다음 게시글을 조회
@@ -295,13 +278,13 @@ public class BoardInfoService {
 
         boolean writable = board.isWritable();
 
-        Member member = item.getMember();
+        String createdBy = item.getCreatedBy();
         Member loggedMember = memberUtil.getMember();
 
-        boolean editable = member == null || (memberUtil.isLogin() && loggedMember.getEmail().equals(member.getEmail())); // 비회원게시글은 비밀번호 확인이 필요하므로 버튼 노출, 회원게시글 로그인한 회원과 일치하면 버튼 노출
+        boolean editable = createdBy == null || (memberUtil.isLogin() && loggedMember.getEmail().equals(createdBy)); // 비회원게시글은 비밀번호 확인이 필요하므로 버튼 노출, 회원게시글 로그인한 회원과 일치하면 버튼 노출
 
-        boolean mine = request.getSession().getAttribute("board_" + item.getSeq()) != null
-                        || (member != null && memberUtil.isLogin() && loggedMember.getEmail().equals(member.getEmail()));
+        boolean mine = utils.getValue(utils.getUserHash() + "_board_" + item.getSeq()) != null
+                        || (memberUtil.isLogin() && loggedMember.getEmail().equals(createdBy));
 
         item.setListable(listable);
         item.setWritable(writable);

@@ -8,13 +8,14 @@ import org.koreait.board.entities.BoardData;
 import org.koreait.board.exceptions.BoardDataNotFoundException;
 import org.koreait.board.repositories.BoardDataRepository;
 import org.koreait.board.services.configs.BoardConfigInfoService;
-import org.koreait.file.services.FileDoneService;
-import org.koreait.member.libs.MemberUtil;
+import org.koreait.global.libs.Utils;
+import org.koreait.member.MemberUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 
@@ -29,7 +30,8 @@ public class BoardUpdateService {
     private final MemberUtil memberUtil;
     private final PasswordEncoder passwordEncoder;
     private final HttpServletRequest request;
-    private final FileDoneService fileDoneService;
+    private final RestTemplate restTemplate;
+    private final Utils utils;
 
     public BoardData process(RequestBoard form) {
 
@@ -49,7 +51,6 @@ public class BoardUpdateService {
             Board board = configInfoService.get(form.getBid());
             data = new BoardData();
             data.setBoard(board);
-            data.setMember(memberUtil.getMember());
             data.setGid(form.getGid());
             data.setIpAddr(request.getRemoteAddr());
             data.setUserAgent(request.getHeader("User-Agent"));
@@ -75,10 +76,13 @@ public class BoardUpdateService {
         data.setCategory(form.getCategory());
 
         boardDataRepository.saveAndFlush(data);
-        fileDoneService.process(form.getGid());
+
+        /* 게시글 파일 첨부 작업 완료 처리 S */
+
+        /* 게시글 파일 첨부 작업 완료 처리 E */
 
         // 비회원 게시글 인증 정보 삭제
-        request.getSession().removeAttribute("board_" + seq);
+        utils.deleteValue(utils.getUserHash() + "_board_" + seq);
 
         return data;
     }
