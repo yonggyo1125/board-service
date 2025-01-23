@@ -14,10 +14,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Lazy
@@ -162,5 +159,9 @@ public class Utils {
         CodeValue item = codeValueRepository.findByCode(code);
 
         return item == null ? null : (T)item.getValue();
+    }
+
+    public String getUserHash() {
+        return getValue("" + Objects.hash("userHash"));
     }
 }
