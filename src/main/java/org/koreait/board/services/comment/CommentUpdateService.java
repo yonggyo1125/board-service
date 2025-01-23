@@ -10,7 +10,6 @@ import org.koreait.board.exceptions.CommentNotFoundException;
 import org.koreait.board.repositories.BoardDataRepository;
 import org.koreait.board.repositories.CommentDataRepository;
 import org.koreait.board.services.BoardInfoService;
-import org.koreait.member.libs.MemberUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ public class CommentUpdateService {
     private final CommentDataRepository commentDataRepository;
     private final BoardDataRepository boardDataRepository;
     private final BoardInfoService boardInfoService;
-    private final MemberUtil memberUtil;
     private final HttpServletRequest request;
     private final PasswordEncoder passwordEncoder;
 
@@ -48,7 +46,6 @@ public class CommentUpdateService {
         } else { // 댓글 등록
             BoardData data = boardInfoService.get(boardDataSeq); // 게시글 데이터
             item = new CommentData();
-            item.setMember(memberUtil.getMember());
             item.setData(data);
             item.setIpAddr(request.getRemoteAddr());
             item.setUserAgent(request.getHeader("User-Agent"));
