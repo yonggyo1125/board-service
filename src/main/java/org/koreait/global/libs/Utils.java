@@ -2,6 +2,8 @@ package org.koreait.global.libs;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.koreait.global.entities.CodeValue;
+import org.koreait.global.repositories.CodeValueRepository;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.MessageSource;
@@ -26,6 +28,7 @@ public class Utils {
     private final HttpServletRequest request;
     private final MessageSource messageSource;
     private final DiscoveryClient discoveryClient;
+    private final CodeValueRepository codeValueRepository;
 
     /**
      * 메서지 코드로 조회된 문구
@@ -132,5 +135,32 @@ public class Utils {
      */
     public String getUrl(String url) {
         return String.format("%s://%s:%d%s%s", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath(), url);
+    }
+
+    /**
+     * Code - Value 레디스 저장소 저장
+     *
+     * @param code
+     * @param value
+     */
+    public void saveValue(String code, Object value) {
+        CodeValue item = new CodeValue();
+        item.setCode(code);
+        item.setValue(value);
+
+        codeValueRepository.save(item);
+    }
+
+    /**
+     * code 값으로 value값 조회
+     *
+     * @param code
+     * @return
+     * @param <T>
+     */
+    public <T> T getValue(String code) {
+        CodeValue item = codeValueRepository.findByCode(code);
+
+        return item == null ? null : (T)item.getValue();
     }
 }
