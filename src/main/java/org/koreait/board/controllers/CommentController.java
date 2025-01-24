@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.entities.CommentData;
 import org.koreait.board.services.BoardAuthService;
+import org.koreait.board.services.comment.CommentDeleteService;
+import org.koreait.board.services.comment.CommentInfoService;
 import org.koreait.board.services.comment.CommentUpdateService;
 import org.koreait.board.validators.CommentValidator;
 import org.koreait.global.exceptions.BadRequestException;
@@ -15,6 +17,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/comment")
@@ -24,6 +28,8 @@ public class CommentController {
     private final CommentValidator commentValidator;
     private final CommentUpdateService updateService;
     private final BoardAuthService authService;
+    private final CommentInfoService infoService;
+    private final CommentDeleteService deleteService;
 
     /**
      * 댓글 작성, 수정
@@ -58,8 +64,11 @@ public class CommentController {
      */
     @GetMapping("/view/{seq}")
     public JSONData view(@PathVariable("seq") Long seq) {
+        commonProcess(seq);
 
-        return null;
+        CommentData item = infoService.get(seq);
+
+        return new JSONData(item);
     }
 
     /**
@@ -71,7 +80,9 @@ public class CommentController {
     @GetMapping("/list/{seq}")
     public JSONData list(@PathVariable("seq") Long seq) {
 
-        return null;
+        List<CommentData> items = infoService.getList(seq);
+
+        return new JSONData(items);
     }
 
     /**
@@ -82,8 +93,11 @@ public class CommentController {
      */
     @DeleteMapping("/{seq}")
     public JSONData delete(@PathVariable("seq") Long seq) {
+        commonProcess(seq);
 
-        return null;
+        CommentData item = deleteService.delete(seq);
+
+        return new JSONData(item);
     }
 
     /**
