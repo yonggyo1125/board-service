@@ -71,7 +71,7 @@ public class Pagination {
 
         /* 쿼리스트링 값 처리 S */
         String qs = request == null ? "" : request.getQueryString();
-        baseUrl = request == null ? "?" : String.format("%s://%s:%d%s?", request.getScheme(), request.getServerName(), request.getServerPort(), request.getContextPath());
+        baseUrl = request == null ? "?" : String.format("%s://%s:%d%s?", request.getScheme(), request.getServerName(), request.getServerPort(), StringUtils.hasText(request.getContextPath()) ? request.getContextPath() : "/");
 
         if (StringUtils.hasText(qs)) {
             baseUrl += Arrays.stream(qs.split("&"))
