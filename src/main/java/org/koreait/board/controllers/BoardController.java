@@ -4,12 +4,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.entities.Board;
 import org.koreait.board.entities.BoardData;
+import org.koreait.board.services.BoardDeleteService;
 import org.koreait.board.services.BoardInfoService;
 import org.koreait.board.services.BoardUpdateService;
 import org.koreait.board.services.configs.BoardConfigInfoService;
 import org.koreait.board.validators.BoardValidator;
 import org.koreait.global.exceptions.BadRequestException;
 import org.koreait.global.libs.Utils;
+import org.koreait.global.paging.ListData;
 import org.koreait.global.rests.JSONData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class BoardController {
     private final BoardConfigInfoService configInfoService;
     private final BoardUpdateService updateService;
     private final BoardInfoService infoService;
+    private final BoardDeleteService deleteService;
 
     /**
      * 게시판 설정 한개 조회
@@ -85,10 +88,12 @@ public class BoardController {
      * @return
      */
     @GetMapping("/list/{bid}")
-    public JSONData list(@PathVariable("bid") String bid) {
+    public JSONData list(@PathVariable("bid") String bid, @ModelAttribute BoardSearch search) {
         commonProcess(bid, "list");
 
-        return null;
+        ListData<BoardData> data = infoService.getList(bid, search);
+
+        return new JSONData(data);
     }
 
     /**
@@ -100,6 +105,9 @@ public class BoardController {
     @DeleteMapping("/{seq}")
     public JSONData delete(@PathVariable("seq") Long seq) {
         commonProcess(seq, "delete");
+
+        boardValidator.checkDelete(seq); // 댓글이 존재하면 삭제 불가
+        deleteService.delete(seq);
 
         return null;
     }
