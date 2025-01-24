@@ -2,6 +2,7 @@ package org.koreait.board.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koreait.board.entities.CommentData;
 import org.koreait.board.services.BoardAuthService;
 import org.koreait.board.services.comment.CommentUpdateService;
 import org.koreait.board.validators.CommentValidator;
@@ -31,14 +32,21 @@ public class CommentController {
      */
     @PostMapping("/save")
     public JSONData save(@RequestBody @Valid RequestComment form, Errors errors) {
-
+        String mode = form.getMode();
+        mode = StringUtils.hasText(mode) ? mode : "write";
+        if (mode.equals("edit")) { // 수정 권한 여부 체크
+            commonProcess(form.getSeq());
+        }
+        
         commentValidator.validate(form, errors);
-
+        
         if (errors.hasErrors()) {
             throw new BadRequestException(utils.getErrorMessages(errors));
         }
 
-        return null;
+        CommentData data = updateService.save(form);
+
+        return new JSONData(data);
     }
 
     /**
