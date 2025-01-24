@@ -2,6 +2,8 @@ package org.koreait.board.controllers;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.koreait.board.services.BoardAuthService;
+import org.koreait.board.services.comment.CommentUpdateService;
 import org.koreait.board.validators.CommentValidator;
 import org.koreait.global.exceptions.BadRequestException;
 import org.koreait.global.libs.Utils;
@@ -19,6 +21,8 @@ public class CommentController {
 
     private final Utils utils;
     private final CommentValidator commentValidator;
+    private final CommentUpdateService updateService;
+    private final BoardAuthService authService;
 
     /**
      * 댓글 작성, 수정
@@ -92,5 +96,14 @@ public class CommentController {
         HttpStatus status = commentValidator.checkGuestPassword(password, seq) ? HttpStatus.NO_CONTENT : HttpStatus.UNAUTHORIZED;
 
         return ResponseEntity.status(status).build();
+    }
+
+    /**
+     * 공통 처리
+     *
+     * @param seq
+     */
+    private void commonProcess(Long seq) {
+        authService.check("comment", seq); // 댓글 권한 체크
     }
 }
