@@ -75,8 +75,8 @@ public class Pagination {
             baseUrl = "?";
         } else {
             int port = request.getServerPort();
-            String _port = port == 80 || port == 443 ? "" : "" + port;
-            baseUrl = String.format("%s://%s:%s%s?", request.getScheme(), request.getServerName(), _port, StringUtils.hasText(request.getContextPath()) ? request.getContextPath() : "/");
+            String _port = port == 80 || port == 443 ? "" : ":" + port;
+            baseUrl = String.format("%s://%s%s%s?", request.getScheme(), request.getServerName(), _port, StringUtils.hasText(request.getContextPath()) ? request.getContextPath() : "/");
         }
 
 
