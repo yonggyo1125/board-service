@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.entities.Board;
 import org.koreait.board.entities.BoardData;
-import org.koreait.board.services.BoardAuthService;
-import org.koreait.board.services.BoardDeleteService;
-import org.koreait.board.services.BoardInfoService;
-import org.koreait.board.services.BoardUpdateService;
+import org.koreait.board.services.*;
 import org.koreait.board.services.configs.BoardConfigInfoService;
 import org.koreait.board.validators.BoardValidator;
 import org.koreait.global.exceptions.BadRequestException;
@@ -31,6 +28,7 @@ public class BoardController {
     private final BoardInfoService infoService;
     private final BoardDeleteService deleteService;
     private final BoardAuthService authService;
+    private final BoardViewUpdateService viewUpdateService;
 
     /**
      * 게시판 설정 한개 조회
@@ -104,9 +102,9 @@ public class BoardController {
      * @param seq
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @GetMapping("/update/viewcount")
+    @GetMapping("/viewcount/{seq}")
     public void updateViewCount(@PathVariable("seq") Long seq) {
-
+        viewUpdateService.process(seq);
     }
 
     /**
