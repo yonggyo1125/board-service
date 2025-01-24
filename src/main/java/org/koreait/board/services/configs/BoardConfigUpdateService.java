@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Lazy
@@ -22,10 +24,31 @@ public class BoardConfigUpdateService {
     public Board process(RequestConfig form) {
 
         String bid = form.getBid();
-
         Board board = boardRepository.findById(bid).orElseGet(Board::new);
+        addInfo(board, form);
 
-        board.setBid(bid);
+        boardRepository.saveAndFlush(board);
+
+        return board;
+    }
+
+    public List<Board> process(List<RequestConfig> items) {
+        if (items == null || items.isEmpty()) return null;
+
+        List<Board> processed = new ArrayList<>();
+        for (RequestConfig form : items) {
+            Board item = boardRepository.findById(form.getBid()).orElseGet(Board::new);
+            addInfo(item, form);
+            processed.add(item);
+        }
+
+        boardRepository.saveAllAndFlush(processed);
+
+        return processed;
+    }
+
+    private void addInfo(Board board, RequestConfig form) {
+        board.setBid(form.getBid());
         board.setName(form.getName());
         board.setOpen(form.isOpen());
         board.setCategory(form.getCategory());
@@ -46,9 +69,5 @@ public class BoardConfigUpdateService {
         board.setLocationAfterWriting(StringUtils.hasText(locationAfterWriting) ? locationAfterWriting : "list");
 
         board.setListUnderView(form.isListUnderView());
-
-        boardRepository.saveAndFlush(board);
-
-        return board;
     }
 }
