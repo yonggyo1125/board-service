@@ -19,7 +19,7 @@ public class BoardConfigUpdateService {
     private final BoardRepository boardRepository;
     private final Utils utils;
 
-    public void process(RequestConfig form) {
+    public Board process(RequestConfig form) {
 
         String bid = form.getBid();
 
@@ -48,5 +48,7 @@ public class BoardConfigUpdateService {
         board.setListUnderView(form.isListUnderView());
 
         boardRepository.saveAndFlush(board);
+
+        return board;
     }
 }
