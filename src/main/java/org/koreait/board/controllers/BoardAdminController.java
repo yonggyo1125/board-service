@@ -3,7 +3,6 @@ package org.koreait.board.controllers;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.entities.Board;
-import org.koreait.board.services.BoardDeleteService;
 import org.koreait.board.services.configs.BoardConfigInfoService;
 import org.koreait.board.services.configs.BoardConfigUpdateService;
 import org.koreait.board.validators.BoardConfigValidator;
@@ -25,7 +24,6 @@ public class BoardAdminController {
     private final BoardConfigValidator configValidator;
     private final BoardConfigUpdateService updateService;
     private final BoardConfigInfoService infoService;
-    private final BoardDeleteService deleteService;
 
     /**
      * 게시판 설정 등록, 수정 처리
