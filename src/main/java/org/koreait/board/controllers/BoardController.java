@@ -99,6 +99,17 @@ public class BoardController {
     }
 
     /**
+     * 조회수 업데이트 처리
+     *
+     * @param seq
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @GetMapping("/update/viewcount")
+    public void updateViewCount(@PathVariable("seq") Long seq) {
+
+    }
+
+    /**
      * 게시글 한개 삭제
      *
      * @param seq
