@@ -25,7 +25,6 @@ public class MemberUtil {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof Member) {
-            System.out.println("member : " + authentication.getPrincipal());
             return (Member) authentication.getPrincipal();
         }
 
