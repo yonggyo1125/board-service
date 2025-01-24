@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.koreait.board.entities.Board;
 import org.koreait.board.entities.BoardData;
+import org.koreait.board.services.BoardAuthService;
 import org.koreait.board.services.BoardDeleteService;
 import org.koreait.board.services.BoardInfoService;
 import org.koreait.board.services.BoardUpdateService;
@@ -29,6 +30,7 @@ public class BoardController {
     private final BoardUpdateService updateService;
     private final BoardInfoService infoService;
     private final BoardDeleteService deleteService;
+    private final BoardAuthService authService;
 
     /**
      * 게시판 설정 한개 조회
@@ -107,9 +109,9 @@ public class BoardController {
         commonProcess(seq, "delete");
 
         boardValidator.checkDelete(seq); // 댓글이 존재하면 삭제 불가
-        deleteService.delete(seq);
+        BoardData item = deleteService.delete(seq);
 
-        return null;
+        return new JSONData(item);
     }
 
     /**
@@ -139,7 +141,7 @@ public class BoardController {
      * @param mode
      */
     private void commonProcess(Long seq, String mode) {
-
+        authService.check(mode, seq); // 게시판 권한 체크 - 조회, 수정, 삭제
     }
 
     /**
@@ -149,6 +151,6 @@ public class BoardController {
      * @param mode
      */
     private void commonProcess(String bid, String mode) {
-
+        authService.check(mode, bid); // 게시판 권한 체크 - 글목록, 글 작성
     }
 }
